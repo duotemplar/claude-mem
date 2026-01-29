@@ -57,13 +57,14 @@ export function clearPortCache(): void {
 }
 
 /**
- * Check if worker is responsive and fully initialized by trying the readiness endpoint
- * Changed from /health to /api/readiness to ensure MCP initialization is complete
+ * Check if worker is responsive by trying the health endpoint
+ * Uses /api/health instead of /api/readiness to avoid waiting for full MCP initialization
+ * This is sufficient for hook communication since worker can accept requests during background init
  */
 async function isWorkerHealthy(): Promise<boolean> {
   const port = getWorkerPort();
   // Note: Removed AbortSignal.timeout to avoid Windows Bun cleanup issue (libuv assertion)
-  const response = await fetch(`http://127.0.0.1:${port}/api/readiness`);
+  const response = await fetch(`http://127.0.0.1:${port}/api/health`);
   return response.ok;
 }
 

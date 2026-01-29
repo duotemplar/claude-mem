@@ -30,6 +30,7 @@ export async function isPortInUse(port: number): Promise<boolean> {
 
 /**
  * Wait for the worker to become fully ready (passes readiness check)
+ * Uses /api/health instead of /api/readiness for faster response during startup
  * @param port Worker port to check
  * @param timeoutMs Maximum time to wait in milliseconds
  * @returns true if worker became ready, false if timeout
@@ -39,7 +40,7 @@ export async function waitForHealth(port: number, timeoutMs: number = 30000): Pr
   while (Date.now() - start < timeoutMs) {
     try {
       // Note: Removed AbortSignal.timeout to avoid Windows Bun cleanup issue (libuv assertion)
-      const response = await fetch(`http://127.0.0.1:${port}/api/readiness`);
+      const response = await fetch(`http://127.0.0.1:${port}/api/health`);
       if (response.ok) return true;
     } catch (error) {
       // [ANTI-PATTERN IGNORED]: Retry loop - expected failures during startup, will retry
